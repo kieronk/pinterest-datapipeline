@@ -57,7 +57,7 @@ new_connector = AWSDBConnector()
 
 # attempting to make this a function 
 
-def send_data_to_kafka(data_type):
+def send_data_to_kafka(data_type, data_label):
     
     random_row = random.randint(0, 11000)
     engine = new_connector.create_db_connector() 
@@ -89,15 +89,22 @@ def send_data_to_kafka(data_type):
             }
 
             # Make the POST request to the Kafka REST Proxy
-            response = requests.post(f"{api_url}/topics/0ebb0073c95b.pin", headers=headers, data=payload)
+            response = requests.post(f"{api_url}/topics/0ebb0073c95b{data_label}", headers=headers, data=payload)
+
+            # response = requests.post(f"{api_url}/{topic_url}", headers=headers, data=payload)
+            # and have the topic_url
+            # topics/0ebb0073c95b.pin
+            # topics/0ebb0073c95b.geo
+            # topics/0ebb0073c95b.user
+            # that would be passed in when I called it? 
 
             # Print the status and response from Kafka REST Proxy
             print(f"Sent data, {response.status_code}, {response.text}")
 
 
 if __name__ == "__main__":
-    send_data_to_kafka('pinterest_data')
-    send_data_to_kafka('geolocation_data')
-    send_data_to_kafka('user_data')
+    send_data_to_kafka('pinterest_data', '.pin') #and topic url
+    send_data_to_kafka('geolocation_data', '.geo') #and topic url
+    send_data_to_kafka('user_data', '.user') #and topic url
 
 
