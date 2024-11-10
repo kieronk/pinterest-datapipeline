@@ -1,42 +1,42 @@
-## pinterest-datapipeline
+# pinterest-datapipeline
 
 This project attempts to replicate the Pinterest data pipeline. 
 
 The project brings together several elements: 
 
-# Data: 
+## Data: 
 
 Note: The data used in this project is synthetic and as such, contains no real user data. 
 
-There are 3 different datasets used in this project. They replicate the type of data found in pinterest posts: 
-- 'Pin' data. This is data about the 'pins' that users have created. Essentially the content of the pin they place on the site. For example: the title of the pin, or the content of the post. 
-- 'Geo' data. This is geolocation data about the pin that has been created. Such as the country, latitude and longitude in which the pin was created.
-- 'User' data. This is data about the user who posted the pin, such as their user name, and the name associated with the user account. 
+There are 3 different datasets used in this project. They replicate the type of data found in Pinterest posts: 
+- 'Pin' data. This is data about the 'Pins' that users have created. Essentially the content of the Pin they place on the site. For example: the title of the Pin, or the content of the Pin. 
+- 'Geo' data. This is geolocation data about the Pin that has been created. Such as the country, latitude and longitude in which the pin was created.
+- 'User' data. This is data about the user who posted the Pin, such as their user name, and the name associated with the user account. 
 
 The 3 datasets can used in 2 different process with the files contained in this repo: 
-- Batch processing and cleaning using Kafka
+- Batch processing and data transformation using Kafka
 - Streaming using AWS kinesis 
 
-# File structure 
+## File structure 
 
-## Batch Processing
+### Batch Processing
 
 user_posting_emulation.py
-This python file connects to an AWS RDS database, selects the data from the database for the 3 different datasets mentioned above, and sends them to Kafka via an API that was created in AWS API Gateway. 
+This python file connects to an AWS RDS database, selects the data from the database for the 3 different datasets mentioned above, and sends them to Kafka via an API that was created in AWS API Gateway. The data is stored in topics in an S3 bucket. 
 
 pinterest_dataCleaning
-This takes 3 differents datasets from 3 seperate S3 buckets and performs transformations ensuring they are clean and formatted correctly. 
+This takes the 3 differents datasets stored in the S3 bucket and performs transformations ensuring they are clean and formatted correctly. 
 
-## Streaming
+### Streaming
 
 user_posting_emulation_streaming.py 
-This python connects to the same AWS RDS database mentioned above, selects the data from the database for the 3 different datasets, and posts them kinesis. This is with the aim of creating a data stream of the data. 
+This python connects to the same AWS RDS database mentioned above, selects the data from the database for the 3 different datasets, and posts them kinesis.  
 
 read_data_from_kinesis
 This notebook reads data from 3 different kinesis streams, performs transformations to ensure they are clean and fomatted correctly, then writes them to a Delta Table in Spark. 
 
 
-# Installation instructions
+## Installation instructions
 
 The infrastructure for this project was set up on AWS and Databricks. 
 
@@ -46,12 +46,12 @@ The elements are:
   - IAM MSK authentication package
   - Java version 8 (in order to use Kafka)
 - AWS S3
-  - With a dedicated bucket to receive the batch data sent via Kafka in each of the Kafka topis 
+  - With a dedicated bucket to receive the batch data sent via Kafka and store it in Kafka topics.  
   - With the Confluent.io Amazon S3 Connector downloaded to connect to Kafka 
 - AWS MSK
   - With a custom plugin and connector   
 - AWS MWAA
-  - With the DAG to run the databricks notebook  
+  - With a DAG to run the databricks notebook which gathers the latest data    
 - AWS API Gateway
   - To create the Kafka REST proxy integration
 - AWS Kinesis Data Streams
@@ -75,9 +75,9 @@ multiprocessing
 boto3
 dotenv
 
-# Usage instructions
+## Usage instructions
 
-Process: 
+### Setup Process: 
 - Set up a EC2 instance and install Kafka ver: 2.12-2.8.1 and the IAM MSK authentication package
 - Ensure you have the the necessary permissions to authenticate to the MSK cluster and configure your Kafka client to use AWS IAM authentication to the cluster
 - Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In user_posting_emulation.py the topics had a unique idenfier followed by .pin, .geo or .user
@@ -86,23 +86,21 @@ Process:
 - Create a custom plugin and connector in the MSK Connect console
 - Create an API (using API Gateway) and create a Kafka REST proxy integration
 - Set up the Kafka REST proxy on the EC2 client
-  -  Install the Confluent package for the Kafka REST Proxy on your EC2 client machine.
+  -  Install the Confluent package for the Kafka REST Proxy on your EC2 client machine
   -  Allow the REST proxy to perform IAM authentication to the MSK cluster
   -  Ensure the REST proxy on the EC2 client machine is started when you want to start sending dtaa
 -  Modify user_posting_emulation.py with the specific details you have used to send data to your Kafka topics. The data will be sent to the S3 bucket across the 3 different topics
 - Upload DAG to AWS MWAA environment
   - Here you will need to connect Databricks to the AWS account, including creating  an API token in Databricks, set up the MWAA-Databricks connection and create a requirements.txt file. 
 
-Streaming 
-- Using Kinesis Data Streams create three data streams, one for each Pinterest table. In user_posting_emulation_streaming.py these are streaming-<unique_id>-pin
-- Configure your previously created REST API to allow it to invoke Kinesis actions
+Extra process steps for datastreaming with Kinesis:  
+- Using Kinesis Data Streams create three data streams, one for each Pinterest table. In user_posting_emulation_streaming.py these have this format: streaming-<unique_id>-pin
+- Configure the previously created REST API to allow it to invoke Kinesis actions
   - The API should be able to:
     - List streams in Kinesis
     - Create, describe and delete streams in Kinesis
     - Add records to streams in Kinesis
 - Use user_posting_emulation_streaming.py to send data to Kinesis
 
-
-File structure of the project
-
-#License information
+## Note 
+This project was created for personal educational purposes, based on coursework from [AI-Core](https://www.theaicore.com/). It is not intended for production use.
