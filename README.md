@@ -4,7 +4,7 @@ This project attempts to replicate the Pinterest data pipeline.
 
 The project brings together several elements: 
 
-#Data: 
+# Data: 
 
 Note: The data used in this project is synthetic and as such, contains no real user data. 
 
@@ -17,7 +17,9 @@ The 3 datasets can used in 2 different process with the files contained in this 
 - Batch processing and cleaning using Kafka
 - Streaming using AWS kinesis 
 
-#Batch Processing
+# File structure 
+
+## Batch Processing
 
 user_posting_emulation.py
 This python file connects to an AWS RDS database, selects the data from the database for the 3 different datasets mentioned above, and sends them to Kafka via an API that was created in AWS API Gateway. 
@@ -25,7 +27,7 @@ This python file connects to an AWS RDS database, selects the data from the data
 pinterest_dataCleaning
 This takes 3 differents datasets from 3 seperate S3 buckets and performs transformations ensuring they are clean and formatted correctly. 
 
-#Streaming
+## Streaming
 
 user_posting_emulation_streaming.py 
 This python connects to the same AWS RDS database mentioned above, selects the data from the database for the 3 different datasets, and posts them kinesis. This is with the aim of creating a data stream of the data. 
