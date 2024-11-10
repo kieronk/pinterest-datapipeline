@@ -38,40 +38,22 @@ This notebook reads data from 3 different kinesis streams, performs transformati
 
 The infrastructure for this project was set up on AWS and Databricks. 
 
-The requirements are: 
+The elements are: 
 - An  EC2 instance running
   - Kafka ver: 2.12-2.8.1
   - IAM MSK authentication package
   - Java version 8 (in order to use Kafka)
 - AWS S3
-  - With a dedicated bucket to receive the batch data sent via Kafka
-s-  
-
-AWS M
-3 kafka topics for each of the 3 datasets running on the EC2 instance. In the code they are called 0ebb0073c95b.pin, 0ebb0073c95b.geo, 0ebb0073c95b.user 
-
-An S3 bucket set up with the Confluent.io Amazon S3 Connector in order that the S3 bucket can connect with Kafka 
-
-An MSK cluster 
-
-An API created via AWS APIT gateway that can send data to the 
-
-Process: 
-- Set up a EC2 instance and install Kafka ver: 2.12-2.8.1 and the IAM MSK authentication package
-- Ensure you have the the necessary permissions to authenticate to the MSK cluster and configure your Kafka client to use AWS IAM authentication to the cluster
-- Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In this repo the topics had a unique idenfier followed by .pin, .geo or .user
-- Create a S3 bucket, with an IAM role that allows you to write to this bucket and a VPC Endpoint to S3
-- On the EC2 client, download the Confluent.io Amazon S3 Connector and copy it to the S3 bucket 
-- Create a custom plugin and connector in the MSK Connect console
-- Create an API (using API Gateway) and create a Kafka REST proxy integration
-- Set up the Kafka REST proxy on the EC@ client
-  -  install the Confluent package for the Kafka REST Proxy on your EC2 client machine.
-  -  Allow the REST proxy to perform IAM authentication to the MSK cluster
-  -  Ensure the REST proxy on the EC2 client machine is started when you want to start sending dtaa
--  Modify user_posting_emulation.py with the specific details you have used to send data to your Kafka topics. The data will be sent to the S3 bucket across the 3 different topics
-- Upload DAG to AWS MWAA environment
--   In this step, you will need to connect Databricks  create an API token in Databricks to connect to your AWS account, set up the MWAA-Databricks connection and create a requirements.txt file. 
-
+  - With a dedicated bucket to receive the batch data sent via Kafka in each of the Kafka topis 
+  - With the Confluent.io Amazon S3 Connector downloaded to connect to Kafka 
+- AWS MSK
+  - With a custom plugin and connector   
+- AWS MWAA
+  - With the DAG to run the databricks notebook  
+- AWS API Gateway
+  - To create the Kafka REST proxy integration
+- AWS Kinesis Data Streams
+-   With three data streams, one for each Pinterest table
 
 The project requires these packages: 
 pyspark.sql 
@@ -91,8 +73,32 @@ multiprocessing
 boto3
 dotenv
 
-
 # Usage instructions
+
+Process: 
+- Set up a EC2 instance and install Kafka ver: 2.12-2.8.1 and the IAM MSK authentication package
+- Ensure you have the the necessary permissions to authenticate to the MSK cluster and configure your Kafka client to use AWS IAM authentication to the cluster
+- Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In user_posting_emulation.py the topics had a unique idenfier followed by .pin, .geo or .user
+- Create a S3 bucket, with an IAM role that allows you to write to the bucket and a VPC Endpoint to S3
+- On the EC2 client, download the Confluent.io Amazon S3 Connector and copy it to the S3 bucket 
+- Create a custom plugin and connector in the MSK Connect console
+- Create an API (using API Gateway) and create a Kafka REST proxy integration
+- Set up the Kafka REST proxy on the EC2 client
+  -  Install the Confluent package for the Kafka REST Proxy on your EC2 client machine.
+  -  Allow the REST proxy to perform IAM authentication to the MSK cluster
+  -  Ensure the REST proxy on the EC2 client machine is started when you want to start sending dtaa
+-  Modify user_posting_emulation.py with the specific details you have used to send data to your Kafka topics. The data will be sent to the S3 bucket across the 3 different topics
+- Upload DAG to AWS MWAA environment
+  - Here you will need to connect Databricks to the AWS account, including creating  an API token in Databricks, set up the MWAA-Databricks connection and create a requirements.txt file. 
+
+Streaming 
+- Using Kinesis Data Streams create three data streams, one for each Pinterest table. In user_posting_emulation_streaming.py these are streaming-<unique_id>-pin
+- Configure your previously created REST API to allow it to invoke Kinesis actions
+  - The API should be able to:
+    - List streams in Kinesis
+    - Create, describe and delete streams in Kinesis
+    - Add records to streams in Kinesis
+- Use user_posting_emulation_streaming.py to send data to Kinesis
 
 
 File structure of the project
