@@ -13,6 +13,24 @@ random.seed(100) # ensures that the random numbers are always the same when I ru
 
 class AWSDBConnector:
 
+    """
+    A class used to establish a connection to an AWS-hosted MySQL database using SQLAlchemy.
+
+    This class loads necessary database credentials from environment variables and provides a method 
+    to create an SQLAlchemy engine for database connectivity. 
+
+    Attributes:
+        db_host (str): The hostname of the database server.
+        db_user (str): The username to connect to the database.
+        db_password (str): The password for the specified database user.
+        db_database (str): The name of the target database.
+        db_port (str): The port number on which the database server is listening.
+
+    Methods:
+        create_db_connector():
+            Creates and returns an SQLAlchemy engine using the loaded database credentials.
+    """
+
     def __init__(self):
         
         try:
@@ -49,7 +67,24 @@ api_url = os.getenv('api_url')
 new_connector = AWSDBConnector()
 
 def send_data_to_kafka(data_type, data_label):
-    
+    """
+    Retrieves a random row from a specified database table and sends it to a Kafka topic using the Kafka REST Proxy.
+
+    This function connects to a database table (specified by `data_type`), retrieves a random row,
+    formats it as a JSON payload compatible with Kafka, and sends it to a Kafka topic named 
+    using the specified `data_label`.
+
+    Args:
+        data_type (str): The name of the database table to retrieve data from.
+        data_label (str): A label to uniquely identify the Kafka topic.
+
+    Returns:
+        None
+
+    Raises:
+        requests.exceptions.RequestException: If there's an error in sending the data to Kafka REST Proxy.
+    """
+
     random_row = random.randint(0, 11000)
     engine = new_connector.create_db_connector() 
 

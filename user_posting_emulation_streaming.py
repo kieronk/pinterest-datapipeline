@@ -17,6 +17,35 @@ api_url = os.getenv('api_url')
 new_connector = AWSDBConnector()
 
 def send_data_to_kinesis(data_type, suffix):
+    """
+    Retrieves a random row from a specified database table and sends it to an AWS Kinesis stream.
+
+    This function connects to the specified database table (based on `data_type`), retrieves a random row,
+    formats it as JSON compatible with Kinesis, and sends it to a Kinesis stream using the REST API.
+
+    Args:
+        data_type (str): The name of the database table to retrieve data from.
+        suffix (str): A suffix to add to the Kinesis stream name for unique identification.
+
+    Returns:
+        None
+
+    Raises:
+        requests.exceptions.Timeout: If the request to Kinesis times out.
+        requests.exceptions.HTTPError: If there is an HTTP error when sending data.
+        requests.exceptions.RequestException: For other types of request-related errors.
+
+    Logs:
+        - Retrieved row from the database.
+        - Prepared JSON payload for Kinesis.
+        - Success or error messages for the data transmission.
+
+    Note:
+        - Converts datetime fields in the data to ISO 8601 format strings to avoid errors in JSON serialization.
+        - Uses the 'id' field as the Kinesis `PartitionKey` if present; otherwise, generates a random key.
+    """
+    
+    
     random_row = random.randint(0, 1000)
     engine = new_connector.create_db_connector()
 
