@@ -9,9 +9,7 @@ import sqlalchemy
 from sqlalchemy import text
 from dotenv import load_dotenv
 
-
 random.seed(100) # ensures that the random numbers are always the same when I run this script 
-
 
 class AWSDBConnector:
 
@@ -46,9 +44,6 @@ class AWSDBConnector:
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_database}?charset=utf8mb4")
         return engine
 
-
-new_connector = AWSDBConnector()
-
 # get the api_url
 api_url = os.getenv('api_url')
 
@@ -64,10 +59,9 @@ def send_data_to_kafka(data_type, data_label):
     #data_type = data_type
 
     with engine.connect() as connection:
-
         
-        # Pinterest data
-        query_string = text(f"SELECT * FROM {data_type} LIMIT {random_row}, 1")
+        query_string = text(f"SELECT * FROM {data_type}")
+        #query_string = text(f"SELECT * FROM {data_type} LIMIT {random_row}, 1")
         selected_row = connection.execute(query_string)
 
         for row in selected_row:
