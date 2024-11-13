@@ -24,13 +24,16 @@ The 3 datasets can used in 2 different process with the files contained in this 
 user_posting_emulation.py
 This python file connects to an AWS RDS database, selects the data from the database for the 3 different datasets mentioned above, and sends them to Kafka via an API that was created in AWS API Gateway. The data is stored in topics in an S3 bucket. 
 
-pinterest_dataCleaning
+pinterest_dataCleaning_DAG_job
 This takes the 3 differents datasets stored in the S3 bucket and performs transformations ensuring they are clean and formatted correctly. 
+
+dag_job_clean.py 
+This python file triggers a DAG on AWS MWAA to run pinterest_dataCleaning_DAG_job notebook daily.
 
 ### Streaming
 
 user_posting_emulation_streaming.py 
-This python connects to the same AWS RDS database mentioned above, selects the data from the database for the 3 different datasets, and posts them kinesis.  
+This python file connects to the same AWS RDS database mentioned above, selects the data from the database for the 3 different datasets, and posts them kinesis.  
 
 read_data_from_kinesis
 This notebook reads data from 3 different kinesis streams, performs transformations to ensure they are clean and fomatted correctly, then writes them to a Delta Table in Spark. 
