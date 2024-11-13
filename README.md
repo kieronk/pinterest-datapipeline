@@ -105,5 +105,8 @@ Extra process steps for datastreaming with Kinesis:
     - Add records to streams in Kinesis
 - Use user_posting_emulation_streaming.py to send data to Kinesis
 
+##  Architecture diagram
+![CloudPinterestPipeline](https://github.com/user-attachments/assets/e948816e-425e-49c9-bfff-ff2bd015bcd3)
+
 ## Note 
 This project was created for personal educational purposes, based on coursework from [AI-Core](https://www.theaicore.com/). It is not intended for production use.
