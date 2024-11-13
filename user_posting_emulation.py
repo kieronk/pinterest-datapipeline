@@ -32,11 +32,9 @@ class AWSDBConnector:
 
         except ValueError as ve:
             print(f"Error loading environment variables: {ve}")
-            # You can also raise the exception again if you want to stop execution
             raise
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-            # Handle any other exceptions 
             raise
  
     
@@ -50,13 +48,10 @@ api_url = os.getenv('api_url')
 # Create a new instance of the AWSDBConnector class
 new_connector = AWSDBConnector()
 
-# attempting to make this a function 
-
 def send_data_to_kafka(data_type, data_label):
     
     random_row = random.randint(0, 11000)
     engine = new_connector.create_db_connector() 
-    #data_type = data_type
 
     with engine.connect() as connection:
         
@@ -79,18 +74,10 @@ def send_data_to_kafka(data_type, data_label):
             # Headers for Kafka REST Proxy
             headers = {
                 'Content-Type': 'application/vnd.kafka.json.v2+json',
-                #'Accept': 'application/vnd.kafka.v2+json'
             }
 
             # Make the POST request to the Kafka REST Proxy
             response = requests.post(f"{api_url}/topics/0ebb0073c95b{data_label}", headers=headers, data=payload)
-
-            # response = requests.post(f"{api_url}/{topic_url}", headers=headers, data=payload)
-            # and have the topic_url
-            # topics/0ebb0073c95b.pin
-            # topics/0ebb0073c95b.geo
-            # topics/0ebb0073c95b.user
-            # that would be passed in when I called it? 
 
             # Print the status and response from Kafka REST Proxy
             print(f"Sent data, {response.status_code}, {response.text}")

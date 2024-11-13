@@ -11,7 +11,7 @@ from datetime import datetime
 # Setup logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Ensure that the API URL is correct and comes from environment variables or is hard-coded.
+# Get the URL from env file 
 api_url = os.getenv('api_url')
 
 new_connector = AWSDBConnector()
@@ -34,10 +34,10 @@ def send_data_to_kinesis(data_type, suffix):
 
             # Log the data before sending
             logging.info(f'Retrieved row: {result}')
-            # Prepare payload without encoding; mapping template handles encoding
+            # Prepare payload 
             payload = json.dumps({
                 "StreamName": f"streaming-0ebb0073c95b{suffix}",
-                "Data": result, #json.dumps(result),
+                "Data": result, 
                 "PartitionKey": str(result.get('id', random.randint(1, 1000)))  # Use 'id' if available, else a random key
             })
 
