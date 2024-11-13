@@ -1,4 +1,3 @@
-  
 import os 
 from airflow import DAG
 from airflow.providers.databricks.operators.databricks import DatabricksSubmitRunOperator
