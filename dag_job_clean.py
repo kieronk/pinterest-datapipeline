@@ -9,11 +9,10 @@ load_dotenv()
 # Get the notebook path from the environment variables
 notebook_path = os.getenv('DATABRICKS_NOTEBOOK_PATH')
 
-# Replace 'john_doe' with your user ID
+# set dag_name
 dag_name = '0ebb0073c95b'
 
-# Default arguments for the DAG
-
+# Create default arguments for the DAG
 default_args = {
     'owner': '0ebb0073c95be',  
     'depends_on_past': False,
@@ -29,15 +28,15 @@ with DAG(
     default_args=default_args,
     description='DAG to trigger a Databricks Notebook daily',
     schedule_interval='@daily',  # Runs daily
-    start_date=datetime(2024, 10, 28),  # Replace with your desired start date
+    start_date=datetime(2024, 10, 28), 
     catchup=False,
 ) as dag:
 
-    # Define the configuration for the Databricks notebook run using an existing cluster
+    # Define the configuration for the Databricks notebook as running using an existing cluster
     databricks_notebook_task = {
-        'existing_cluster_id': '1108-162752-8okw8dgg',  # Replace with the Cluster ID of Pinterest Cluster
+        'existing_cluster_id': '1108-162752-8okw8dgg',  # The cluster ID of Pinterest Cluster
         'notebook_task': {
-            'notebook_path': notebook_path,  # Replace with your actual notebook path
+            'notebook_path': notebook_path,  
         },
     }
 
