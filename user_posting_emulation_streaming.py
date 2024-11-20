@@ -32,6 +32,7 @@ def send_data_to_kinesis(table_name, suffix, user_id):
     Args:
         table_name (str): The name of the database table to retrieve data from.
         suffix (str): A suffix to add to the Kinesis stream name for unique identification.
+        user_id (str): The id of the user on AWS.
 
     Returns:
         None
