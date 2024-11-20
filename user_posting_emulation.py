@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 
 random.seed(100) # ensures that the random numbers are always the same when I run this script 
 
+# Load environment variables from .env file
+load_dotenv()
+
 class AWSDBConnector:
 
     """
@@ -34,10 +37,9 @@ class AWSDBConnector:
     def __init__(self):
         
         try:
-            # Load environment variables from .env file
-            load_dotenv()
 
             # Access the environment variables
+            self.db_prefix = os.getenv('DB_PREFIX')
             self.db_host = os.getenv('DB_HOST')
             self.db_user = os.getenv('DB_USER')
             self.db_password = os.getenv('DB_PASSWORD')
@@ -57,26 +59,30 @@ class AWSDBConnector:
  
     
     def create_db_connector(self):
-        engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_database}?charset=utf8mb4")
+        engine = sqlalchemy.create_engine(f"{self.db_prefix}://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_database}?charset=utf8mb4")
         return engine
 
 # get the api_url
 api_url = os.getenv('api_url')
+if not api_url:
+    raise ValueError("API URL not found in environment variables")
+
 
 # Create a new instance of the AWSDBConnector class
 new_connector = AWSDBConnector()
 
-def send_data_to_kafka(data_type, data_label):
+def send_data_to_kafka(table_name, data_label, user_id):
     """
     Retrieves a random row from a specified database table and sends it to a Kafka topic using the Kafka REST Proxy.
 
-    This function connects to a database table (specified by `data_type`), retrieves a random row,
+    This function connects to a database table (specified by `table_name`), retrieves a random row,
     formats it as a JSON payload compatible with Kafka, and sends it to a Kafka topic named 
     using the specified `data_label`.
 
     Args:
-        data_type (str): The name of the database table to retrieve data from.
+        table_name (str): The name of the database table to retrieve data from.
         data_label (str): A label to uniquely identify the Kafka topic.
+        user_id (str): The id of the user on AWS
 
     Returns:
         None
@@ -90,8 +96,8 @@ def send_data_to_kafka(data_type, data_label):
 
     with engine.connect() as connection:
         
-        query_string = text(f"SELECT * FROM {data_type}")
-        #query_string = text(f"SELECT * FROM {data_type} LIMIT {random_row}, 1")
+        query_string = text(f"SELECT * FROM {table_name}")
+        #query_string = text(f"SELECT * FROM {table_name} LIMIT {random_row}, 1")
         selected_row = connection.execute(query_string)
 
         for row in selected_row:
@@ -112,15 +118,15 @@ def send_data_to_kafka(data_type, data_label):
             }
 
             # Make the POST request to the Kafka REST Proxy
-            response = requests.post(f"{api_url}/topics/0ebb0073c95b{data_label}", headers=headers, data=payload)
+            response = requests.post(f"{api_url}/topics/{user_id}{data_label}", headers=headers, data=payload)
 
             # Print the status and response from Kafka REST Proxy
             print(f"Sent data, {response.status_code}, {response.text}")
 
 
 if __name__ == "__main__":
-    send_data_to_kafka('pinterest_data', '.pin') #and topic url
-    send_data_to_kafka('geolocation_data', '.geo') #and topic url
-    send_data_to_kafka('user_data', '.user') #and topic url
+    send_data_to_kafka('pinterest_data', '.pin', 'user_id') # user id is not included in this public repo 
+    send_data_to_kafka('geolocation_data', '.geo', 'user_id') # user id is not included in this public repo 
+    send_data_to_kafka('user_data', '.user', 'user_id') # user id is not included in this public repo 
 
 

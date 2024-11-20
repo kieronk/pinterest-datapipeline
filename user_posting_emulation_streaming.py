@@ -67,7 +67,7 @@ def send_data_to_kinesis(data_type, suffix):
             payload = json.dumps({
                 "StreamName": f"streaming-0ebb0073c95b{suffix}",
                 "Data": result, 
-                "PartitionKey": str(result.get('id', random.randint(1, 1000)))  # Use 'id' if available, else a random key
+                "PartitionKey": str(result.get('id', random.randint(1, 3)))  # Use 'id' if available, else a random key
             })
 
             # Log the payload
