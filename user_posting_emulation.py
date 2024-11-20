@@ -125,8 +125,9 @@ def send_data_to_kafka(table_name, data_label, user_id):
 
 
 if __name__ == "__main__":
-    send_data_to_kafka('pinterest_data', '.pin', 'user_id') # user id is not included in this public repo 
-    send_data_to_kafka('geolocation_data', '.geo', 'user_id') # user id is not included in this public repo 
-    send_data_to_kafka('user_data', '.user', 'user_id') # user id is not included in this public repo 
+    # note 'user_id' should be replaced with the actual user_id, but that is not included in this public repo
+    send_data_to_kafka('pinterest_data', '.pin', 'user_id')  
+    send_data_to_kafka('geolocation_data', '.geo', 'user_id') 
+    send_data_to_kafka('user_data', '.user', 'user_id') 
 
 

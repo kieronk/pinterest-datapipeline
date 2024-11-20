@@ -7,24 +7,30 @@ import logging
 from sqlalchemy import text
 from user_posting_emulation import AWSDBConnector
 from datetime import datetime
+from dotenv import load_dotenv
 
 # Setup logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Load environment variables from .env file
+load_dotenv()
+
 # Get the URL from env file 
 api_url = os.getenv('api_url')
+if not api_url:
+    raise ValueError("API URL not found in environment variables")
 
 new_connector = AWSDBConnector()
 
-def send_data_to_kinesis(data_type, suffix):
+def send_data_to_kinesis(table_name, suffix, user_id):
     """
     Retrieves a random row from a specified database table and sends it to an AWS Kinesis stream.
 
-    This function connects to the specified database table (based on `data_type`), retrieves a random row,
+    This function connects to the specified database table (based on `table_name`), retrieves a random row,
     formats it as JSON compatible with Kinesis, and sends it to a Kinesis stream using the REST API.
 
     Args:
-        data_type (str): The name of the database table to retrieve data from.
+        table_name (str): The name of the database table to retrieve data from.
         suffix (str): A suffix to add to the Kinesis stream name for unique identification.
 
     Returns:
@@ -50,7 +56,7 @@ def send_data_to_kinesis(data_type, suffix):
     engine = new_connector.create_db_connector()
 
     with engine.connect() as connection:
-        query_string = text(f"SELECT * FROM {data_type} LIMIT {random_row}, 1")
+        query_string = text(f"SELECT * FROM {table_name} LIMIT {random_row}, 1")
         selected_row = connection.execute(query_string)
 
         for row in selected_row:
@@ -65,7 +71,7 @@ def send_data_to_kinesis(data_type, suffix):
             logging.info(f'Retrieved row: {result}')
             # Prepare payload 
             payload = json.dumps({
-                "StreamName": f"streaming-0ebb0073c95b{suffix}",
+                "StreamName": f"streaming-{user_id}{suffix}",
                 "Data": result, 
                 "PartitionKey": str(result.get('id', random.randint(1, 3)))  # Use 'id' if available, else a random key
             })
@@ -74,7 +80,7 @@ def send_data_to_kinesis(data_type, suffix):
             logging.info(f"Prepared payload: {payload}")    
             
             headers = {'Content-Type': 'application/json'}
-            invoke_url = f"{api_url}/streams/streaming-0ebb0073c95b{suffix}/record"
+            invoke_url = f"{api_url}/streams/streaming-{user_id}{suffix}/record"
 
             # Send request with a timeout to avoid hanging
             try:
@@ -89,6 +95,7 @@ def send_data_to_kinesis(data_type, suffix):
                 logging.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    send_data_to_kinesis('pinterest_data', '-pin')
-    send_data_to_kinesis('geolocation_data', '-geo')
-    send_data_to_kinesis('user_data', '-user')
+    # note 'user_id' should be replaced with the actual user_id, but that is not included in this public repo
+    send_data_to_kinesis('pinterest_data', '-pin', 'user_id') 
+    send_data_to_kinesis('geolocation_data', '-geo', 'user_id') 
+    send_data_to_kinesis('user_data', '-user', 'user_id') 
