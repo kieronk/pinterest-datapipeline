@@ -1,8 +1,11 @@
 # pinterest-datapipeline
 
-This project attempts to replicate the Pinterest data pipeline. 
+This project replicates Pinterest's experiment analytics data pipeline which runs thousands of experiments per day and crunches billions of datapoints to provide valuable insights to improve the product.
 
-The project brings together several elements: 
+The project is build on a Lambda Architecture design pattern, combining batch processing and stream processing to handle large volumes of data while ensuring scalability, fault tolerance, and low latency. 
+
+##  Architecture diagram
+![CloudPinterestPipeline](https://github.com/user-attachments/assets/e948816e-425e-49c9-bfff-ff2bd015bcd3)
 
 ## Data: 
 
@@ -13,16 +16,16 @@ There are 3 different datasets used in this project. They replicate the type of 
 - 'Geo' data. This is geolocation data about the Pin that has been created. Such as the country or latitude and longitude in which the pin was created.
 - 'User' data. This is data about the user who posted the Pin, such as their user name, and the name associated with the user account. 
 
-The 3 datasets can used in 2 different process with the files contained in this repo: 
-- Batch processing and data transformation using Kafka
-- Streaming using AWS Kinesis 
+The 3 datasets are used in the 2 different process enabled by the files contained in this repo: 
+- Batch processing and data transformation using Kafka.
+- Streaming using AWS Kinesis. 
 
 ## File structure 
 
 ### Batch Processing
 
 user_posting_emulation.py
-This python file connects to an AWS RDS database, selects the data from the database for the 3 different datasets mentioned above, and sends them to Kafka via an API that was created in AWS API Gateway. The data is stored in topics in an S3 bucket. 
+This python file connects to an AWS RDS database, selects the data from the database for the 3 different datasets mentioned above, and sends them to Kafka via a Kafa REST Proxy that was created in AWS API Gateway. The data is stored in topics in an S3 bucket. 
 
 pinterest_dataCleaning_DAG_job
 This takes the 3 differents datasets stored in the S3 bucket and performs transformations ensuring they are clean and formatted correctly. 
@@ -38,27 +41,36 @@ This python file connects to the same AWS RDS database mentioned above, selects 
 read_data_from_kinesis
 This notebook reads data from 3 different Kinesis streams, performs transformations to ensure they are clean and fomatted correctly, then writes them to a Delta Table in Spark. 
 
+## Preqrequites 
 
-## Installation instructions
-
-The infrastructure for this project was set up on AWS and Databricks. 
+The infrastructure for this project was set up using AWS and Databricks. 
 
 The elements are: 
+- An environment (.env) file with:
+  - 'Prefix' for the RDS database url consisting of the database dialect and driver 
+  - RDS database host 
+  - RDS database user 
+  - RDS database password
+  - RDS database name 
+  - RDS database port
+  - API URL
+  - Databricks notebook, needed for the DAG
+  - User ID: this is the user ID for the AMS account, and was specific to this project 
 - An  EC2 instance running
   - Kafka ver: 2.12-2.8.1
   - IAM MSK authentication package
   - Java version 8 (in order to use Kafka)
 - AWS S3
-  - With a dedicated bucket to receive the batch data sent via Kafka and store it in Kafka topics  
-  - With the Confluent.io Amazon S3 Connector downloaded to connect to Kafka 
+  - With a dedicated bucket to receive the batch data sent from the RDS database via Kafka so it can be stored in Kafka topics  
+  - With the Confluent.io Amazon S3 Connector downloaded to connect to the Kafka REST proxy  
 - AWS MSK
   - With a custom plugin and connector   
 - AWS MWAA
   - With a DAG to run the databricks notebook which gathers the latest data    
 - AWS API Gateway
-  - To create the Kafka REST proxy integration
+  - To create the Kafka REST proxy 
 - AWS Kinesis Data Streams
--   With three data streams, one for each Pinterest table
+  - With 3 data streams, one for each Pinterest table
 
 The project requires these packages: 
 pyspark.sql 
@@ -81,9 +93,9 @@ dotenv
 ## Usage instructions
 
 ### Setup Process: 
-- Set up an EC2 instance and install Kafka ver: 2.12-2.8.1 and the IAM MSK authentication package
-- Ensure you have the the necessary permissions to authenticate to the MSK cluster and configure your Kafka client to use AWS IAM authentication with the cluster
-- Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In user_posting_emulation.py the topics had a unique idenfier followed by .pin, .geo or .user (e.g. <unique_id.pin>) 
+- Set up an EC2 instance and install Kafka ver: 2.12-2.8.1 and the IAM MSK authentication package.
+- Ensure you have the the necessary permissions to authenticate the MSK cluster and configure your Kafka client to use AWS IAM authentication with the cluster.
+- Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In user_posting_emulation.py the topics have a unique idenfier followed by .pin, .geo or .user (i.e. the format is: <unique_id.pin>) 
 - Create a S3 bucket, with an IAM role that allows you to write to the bucket and a VPC Endpoint to S3
 - On the EC2 client, download the Confluent.io Amazon S3 Connector and copy it to the S3 bucket 
 - Create a custom plugin and connector in the MSK Connect console
@@ -105,8 +117,10 @@ Extra process steps for datastreaming with Kinesis:
     - Add records to streams in Kinesis
 - Use user_posting_emulation_streaming.py to send data to Kinesis
 
-##  Architecture diagram
-![CloudPinterestPipeline](https://github.com/user-attachments/assets/e948816e-425e-49c9-bfff-ff2bd015bcd3)
+## Future improvements 
+There are potential improvements that could be made to this project in the future. 
+- Implement threading to make the speed by which the data is transferred from the RDS database to the S3 bucket further. 
+- Implementing some methods to validate and test the data processing pipeline at each key stage, such as testing the API is working correctly, or putting validation steps in the datapipe.  
 
 ## Note 
 This project was created for personal educational purposes, based on coursework from [AI-Core](https://www.theaicore.com/). It is not intended for production use.
