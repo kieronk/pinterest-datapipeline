@@ -2,7 +2,7 @@
 
 This project replicates Pinterest's experiment analytics data pipeline which runs thousands of experiments per day and crunches billions of datapoints to provide valuable insights to improve the product.
 
-The project is build on a Lambda Architecture design pattern, combining batch processing and stream processing to handle large volumes of data while ensuring scalability, fault tolerance, and low latency. 
+The task was to create a Lambda architecture ETL data pipeline, which could process incoming batch and streaming data from an external source. For the batch layer, this was comprised of a custom API connected to an MSK Cluster by proxy of an EC2 Kafka Client. The MSK Cluster was connected to an S3 bucket, which acted as a data lake. From the S3 bucket the data was loaded into Databricks, where Apache Spark was used to process and analyse the data, then load it into Hive Metastore. Airflow on AWS (MWAA) was then integrated to orchestrate and automate this entire process. For the streaming layer, the API sent the data on to AWS Kinesis, then Databricks.
 
 ##  Architecture diagram
 ![CloudPinterestPipeline](https://github.com/user-attachments/assets/e948816e-425e-49c9-bfff-ff2bd015bcd3)
