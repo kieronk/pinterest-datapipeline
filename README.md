@@ -73,53 +73,53 @@ The elements are:
   - With 3 data streams, one for each Pinterest table
 
 The project requires these packages: 
-pyspark.sql 
-urllib
-functools
-requests
-random
-os
-json
-base64
-logging
-sqlalchemy
-datetime 
-requests
-time 
-multiprocessing 
-boto3
-dotenv
+- pyspark.sql 
+- urllib
+- functools
+- requests
+- random
+- os
+- json
+- base64
+- logging
+- sqlalchemy
+- datetime 
+- requests
+- time 
+- multiprocessing 
+- boto3
+- dotenv
 
 ## Usage instructions
 
 ### Setup Process: 
 - Set up an EC2 instance and install Kafka ver: 2.12-2.8.1 and the IAM MSK authentication package.
 - Ensure you have the the necessary permissions to authenticate the MSK cluster and configure your Kafka client to use AWS IAM authentication with the cluster.
-- Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In user_posting_emulation.py the topics have a unique idenfier followed by .pin, .geo or .user (i.e. the format is: <unique_id.pin>) 
-- Create a S3 bucket, with an IAM role that allows you to write to the bucket and a VPC Endpoint to S3
-- On the EC2 client, download the Confluent.io Amazon S3 Connector and copy it to the S3 bucket 
-- Create a custom plugin and connector in the MSK Connect console
-- Create an API (using API Gateway) and create a Kafka REST proxy integration
+- Create a Kafka topic for each of the datasets you will batch process (i.e. 3 in total). In user_posting_emulation.py the topics have a unique idenfier followed by .pin, .geo or .user, i.e. the format is: <unique_id.pin>. 
+- Create a S3 bucket, with an IAM role that allows you to write to the bucket and a VPC Endpoint to S3.
+- On the EC2 client, download the Confluent.io Amazon S3 Connector and copy it to the S3 bucket. 
+- Create a custom plugin and connector in the MSK Connect console.
+- Create an API (using API Gateway) and create a Kafka REST proxy integration.
 - Set up the Kafka REST proxy on the EC2 client:
-  -  Install the Confluent package for the Kafka REST Proxy on your EC2 client machine
-  -  Allow the REST proxy to perform IAM authentication to the MSK cluster
-  -  Ensure the REST proxy on the EC2 client machine is started when you want to start sending data
--  Modify user_posting_emulation.py with the specific details you have used to send data to your Kafka topics. The data will be sent to the S3 bucket across the 3 different topics
-- Upload the DAG to AWS MWAA environment
+  -  Install the Confluent package for the Kafka REST Proxy on your EC2 client machine.
+  -  Allow the REST proxy to perform IAM authentication to the MSK cluster.
+  -  Ensure the REST proxy on the EC2 client machine is started when you want to start sending data.
+-  Modify user_posting_emulation.py with the specific details you have used to send data to your Kafka topics. The data will be sent to the S3 bucket across the 3 different topics.
+- Upload the DAG to AWS MWAA environment.
   - Here you will need to connect Databricks to the AWS account, including creating an API token in Databricks, set up the MWAA-Databricks connection and create a requirements.txt file. 
 
 Extra process steps for datastreaming with Kinesis:  
 - Using Kinesis data streams, create three data streams - one for each Pinterest table. In user_posting_emulation_streaming.py the streams have this format: streaming-<unique_id>-pin
-- Configure the previously created REST API to allow it to invoke Kinesis actions
+- Configure the previously created REST API to allow it to invoke Kinesis actions.
   - The API should be able to:
-    - List streams in Kinesis
-    - Create, describe and delete streams in Kinesis
-    - Add records to streams in Kinesis
-- Use user_posting_emulation_streaming.py to send data to Kinesis
+    - List streams in Kinesis.
+    - Create, describe and delete streams in Kinesis.
+    - Add records to streams in Kinesis.
+- Use user_posting_emulation_streaming.py to send data to Kinesis.
 
 ## Future improvements 
 There are potential improvements that could be made to this project in the future. 
-- Implement threading to make the speed by which the data is transferred from the RDS database to the S3 bucket further. 
+- Implement threading to make the speed by which the data is transferred from the RDS database to the S3 bucket faster. 
 - Implementing some methods to validate and test the data processing pipeline at each key stage, such as testing the API is working correctly, or putting validation steps in the datapipe.  
 
 ## Note 
